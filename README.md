@@ -65,6 +65,9 @@ environment variables when jobs are submitted.
 
 ### Implementation Notes
 
+Users should make sure the deploy distributed jobs with a power of 2, or log2(N),
+instances of an application developed with this library.
+
 This implementation uses java.util.streams.* and Java's lambda features. Users will
 need a version of the jdk that supports this functionality.
 
