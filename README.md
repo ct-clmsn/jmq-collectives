@@ -5,55 +5,67 @@
 
 # [jmq-collectives](https://github.com/ct-clmsn/jmq-collectives)
 
-== Description ==
+This library implements a [SPMD](https://en.m.wikipedia.org/wiki/SPMD) (single program
+multiple data) model and collective communication algorithms (Robert van de Geijn's
+Binomial Tree) in Rust using [JMQ](https://github.com/zeromq/jeromq). The library provides log2(N)
+algorithmic performance for each collective operation over N compute hosts.
 
-This library implements Robert Van de Geijn's collective communication
-algorithms using 0MQ (ZeroMQ) in Java. The algorithms are typically
-implemented in MPI on HPC systems to support SPMD (Single Program
-Many Data) applications. The algorithms treat each thread or process
-as a node in a biomial tree.
+Collective communication algorithms are used in HPC (high performance computing) / Supercomputing
+libraries and runtime systems such as [MPI](https://www.open-mpi.org) and [OpenSHMEM](http://openshmem.org).
 
-This library allows users to apply the algorithms over 0MQ's
-inproc (shared memory) backend, ipc (unix pipes) backend, and between
-compute hosts over the tcp backend.
+Documentation for this library can be found on it's [wiki](https://github.com/ct-clmsn/jmq-collectives/wiki).
 
-== Implementation Notes ==
+### Algorithms Implemented
+
+* Broadcast
+* Reduction
+* Scatter
+* Gather
+* Barrier
+
+### Configuring Distributed Program Execution
+
+This library requires the use of environment variables
+to configure distributed runs of SPMD applications.
+Each of the following environment variables needs to be
+supplied to correctly run programs:
+
+* ZMQ_COLLECTIVES_NRANKS
+* ZMQ_COLLECTIVES_RANK
+* ZMQ_COLLECTIVES_ADDRESSES
+
+ZMQ_COLLECTIVES_NRANKS - unsigned integer value indicating
+how many processes (instances or copies of the program)
+are running.
+
+ZMQ_COLLECTIVES_RANK - unsigned integer value indicating
+the process instance this program represents. This is
+analogous to a user provided thread id. The value must
+be 0 or less than ZMQ_COLLECTIVES_NRANKS.
+
+ZMQ_COLLECTIVES_ADDRESSES - should contain a ',' delimited
+list of ip addresses and ports. The list length should be
+equal to the integer value of ZMQ_COLLECTIVES_NRANKS. An
+example for a 2 rank application name `app` is below:
+
+```
+ZMQ_COLLECTIVES_NRANKS=2 ZMQ_COLLECTIVES_RANK=0 ZMQ_COLLECTIVES_ADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
+
+ZMQ_COLLECTIVES_NRANKS=2 ZMQ_COLLECTIVES_RANK=1 ZMQ_COLLECTIVES_ADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
+```
+
+In this example, Rank 0 maps to 127.0.0.1:5555 and Rank 1
+maps to 127.0.0.1:5556.
+
+HPC batch scheduling systems like [Slurm](https://en.m.wikipedia.org/wiki/Slurm_Workload_Manager),
+[TORQUE](https://en.m.wikipedia.org/wiki/TORQUE), [PBS](https://en.wikipedia.org/wiki/Portable_Batch_System),
+etc. provide mechanisms to automatically define these
+environment variables when jobs are submitted.
+
+### Implementation Notes
 
 This implementation uses java.util.streams.* features. Users will
 need a version of the jdk that supports this functionality.
-
-The inproc backend is provided for inter-thread and inter-process
-(processes on the same compute host) communication.
-
-The ipc backend is provided for inter-process communcations
-(processes on the same compute host).
-
-The tpc backend is provided for inter-process communications
-over a network of compute hosts.
-
-This library uses serde for data serialization (marhsalling) and
-deserialization (unmarshalling).
-
-The ZMQ_ROUTER socket types used for each 0MQ backend. This means
-communication initializaton is N^2, where N is the number of
-threads or processes participating in the communication. Since
-the algorithms operate over a binomial tree, algorithmic performance
-is log2(N).
-
-tcp barriers use the reduction and broadcast collectives to identify
-that each thread/process has reached the barrier and the root
-thread/process uses the broadcast to indicate to the child
-threads/processes the barrier constraint has been reached.
-
-== Scaling Limitations ==
-
-Since 0MQ manages communcations over file descriptors and the
-GNU/Linux operating system constrains processes to ~2063 file
-descriptors, users are restricted to around 1024 threads of
-parallelism over the inproc backend. This scaling constraint
-is due to the requirement that each thread participating in
-the communication requires 2 file desciptors to send and recieve
-data.
 
 == License ==
 
