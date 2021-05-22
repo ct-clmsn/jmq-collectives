@@ -78,6 +78,10 @@ The implementation uses JeroMQ's [Router](https://www.javadoc.io/doc/org.zeromq/
 this should provide a measure of connection resiliency. Note scalability limitations for
 this library will be inherited from JeroMQ and the Router socket implementation.
 
+Currently a TCP/IP backend is implemented. TCP is a chatty protocol (lots of network
+traffic is generated) and will have an adverse impact on performance. That said, TCP
+is highly available and reliable.
+
 ### License
 
 Boost 1.0
