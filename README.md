@@ -7,7 +7,7 @@
 
 This library implements a [SPMD](https://en.m.wikipedia.org/wiki/SPMD) (single program
 multiple data) model and collective communication algorithms (Robert van de Geijn's
-Binomial Tree) in Java using [JMQ](https://github.com/zeromq/jeromq). The library provides log2(N)
+Binomial Tree) in Java using [JeroMQ](https://github.com/zeromq/jeromq). The library provides log2(N)
 algorithmic performance for each collective operation over N compute hosts.
 
 Collective communication algorithms are used in HPC (high performance computing) / Supercomputing
