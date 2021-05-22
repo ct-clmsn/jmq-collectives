@@ -71,15 +71,15 @@ This implementation is a *pure Java* implementation of SPMD collectives.
 The intent is to avoid the overhead of calling out of the JVM through
 JNA or JNI.
 
-== License ==
+### License
 
 Boost 1.0
 
-== Author ==
+### Author
 
 Christopher Taylor
 
-== Dependencies ==
+### Dependencies
 
 * [maven](https://maven.apache.org/index.html)
 * [jeromq](https://github.com/zeromq/jeromq)
