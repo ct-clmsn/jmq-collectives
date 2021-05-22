@@ -77,6 +77,6 @@ Christopher Taylor
 
 == Dependencies ==
 
-(maven)[https://maven.apache.org/index.html]
-(jeromq)[https://github.com/zeromq/jeromq]
-(java)[https://openjdk.java.net/]
+* [maven](https://maven.apache.org/index.html)
+* [jeromq](https://github.com/zeromq/jeromq)
+* [java](https://openjdk.java.net/)
