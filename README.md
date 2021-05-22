@@ -33,7 +33,7 @@ supplied to correctly run programs:
 
 * JMQ_COLLECTIVES_NRANKS
 * JMQ_COLLECTIVES_RANK
-* JMQ_COLLECTIVES_ADDRESSES
+* JMQ_COLLECTIVES_IPADDRESSES
 
 JMQ_COLLECTIVES_NRANKS - unsigned integer value indicating
 how many processes (instances or copies of the program)
@@ -44,15 +44,15 @@ the process instance this program represents. This is
 analogous to a user provided thread id. The value must
 be 0 or less than JMQ_COLLECTIVES_NRANKS.
 
-JMQ_COLLECTIVES_ADDRESSES - should contain a ',' delimited
+JMQ_COLLECTIVES_IPADDRESSES - should contain a ',' delimited
 list of ip addresses and ports. The list length should be
 equal to the integer value of JMQ_COLLECTIVES_NRANKS. An
 example for a 2 rank application name `app` is below:
 
 ```
-JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=0 JMQ_COLLECTIVES_ADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
+JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=0 JMQ_COLLECTIVES_IPADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
 
-JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=1 JMQ_COLLECTIVES_ADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
+JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=1 JMQ_COLLECTIVES_IPADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
 ```
 
 In this example, Rank 0 maps to 127.0.0.1:5555 and Rank 1
