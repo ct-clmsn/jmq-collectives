@@ -14,6 +14,7 @@ Collective communication algorithms are used in HPC (high performance computing)
 libraries and runtime systems such as [MPI](https://www.open-mpi.org) and [OpenSHMEM](http://openshmem.org).
 
 Documentation for this library can be found on it's [wiki](https://github.com/ct-clmsn/jmq-collectives/wiki).
+Wikipedia has a nice tutorial on collectives and SPMD programming [here](https://en.wikipedia.org/wiki/Collective_operation).
 
 ### Algorithms Implemented
 
