@@ -30,28 +30,28 @@ to configure distributed runs of SPMD applications.
 Each of the following environment variables needs to be
 supplied to correctly run programs:
 
-* ZMQ_COLLECTIVES_NRANKS
-* ZMQ_COLLECTIVES_RANK
-* ZMQ_COLLECTIVES_ADDRESSES
+* JMQ_COLLECTIVES_NRANKS
+* JMQ_COLLECTIVES_RANK
+* JMQ_COLLECTIVES_ADDRESSES
 
-ZMQ_COLLECTIVES_NRANKS - unsigned integer value indicating
+JMQ_COLLECTIVES_NRANKS - unsigned integer value indicating
 how many processes (instances or copies of the program)
 are running.
 
-ZMQ_COLLECTIVES_RANK - unsigned integer value indicating
+JMQ_COLLECTIVES_RANK - unsigned integer value indicating
 the process instance this program represents. This is
 analogous to a user provided thread id. The value must
-be 0 or less than ZMQ_COLLECTIVES_NRANKS.
+be 0 or less than JMQ_COLLECTIVES_NRANKS.
 
-ZMQ_COLLECTIVES_ADDRESSES - should contain a ',' delimited
+JMQ_COLLECTIVES_ADDRESSES - should contain a ',' delimited
 list of ip addresses and ports. The list length should be
-equal to the integer value of ZMQ_COLLECTIVES_NRANKS. An
+equal to the integer value of JMQ_COLLECTIVES_NRANKS. An
 example for a 2 rank application name `app` is below:
 
 ```
-ZMQ_COLLECTIVES_NRANKS=2 ZMQ_COLLECTIVES_RANK=0 ZMQ_COLLECTIVES_ADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
+JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=0 JMQ_COLLECTIVES_ADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
 
-ZMQ_COLLECTIVES_NRANKS=2 ZMQ_COLLECTIVES_RANK=1 ZMQ_COLLECTIVES_ADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
+JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=1 JMQ_COLLECTIVES_ADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
 ```
 
 In this example, Rank 0 maps to 127.0.0.1:5555 and Rank 1
