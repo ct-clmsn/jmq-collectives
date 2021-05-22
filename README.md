@@ -1,4 +1,4 @@
-jmq-collectives-rs
+#[jmq-collectives-rs](htpps://github.com/ct-clmsn/jmq-collectives)
 
 == Description ==
 
