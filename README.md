@@ -67,6 +67,10 @@ environment variables when jobs are submitted.
 This implementation uses java.util.streams.* features. Users will
 need a version of the jdk that supports this functionality.
 
+This implementation is a *pure Java* implementation of SPMD collectives.
+The intent is to avoid the overhead of calling out of the JVM through
+JNA or JNI.
+
 == License ==
 
 Boost 1.0
