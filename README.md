@@ -14,6 +14,9 @@ compute hosts over the tcp backend.
 
 == Implementation Notes ==
 
+This implementation uses java.util.streams.* features. Users will
+need a version of the jdk that supports this functionality.
+
 The inproc backend is provided for inter-thread and inter-process
 (processes on the same compute host) communication.
 
