@@ -74,8 +74,8 @@ need a version of the jdk that supports this functionality.
 This implementation is a *pure Java* implementation of SPMD collectives. The intent
 is to avoid the overhead of calling out of the JVM through JNA or JNI.
 
-The implementation uses JeroMQ's [Router](https://www.javadoc.io/doc/org.zeromq/jeromq/0.4.0/zmq/Router.html) sockets
-this should provide a measure of connection resiliency. Note scalability limitations for
+The implementation uses JeroMQ's [Router](https://www.javadoc.io/doc/org.zeromq/jeromq/0.4.0/zmq/Router.html)
+sockets. Router sockets should provide a measure of connection resiliency. Note scalability limitations for
 this library will be inherited from JeroMQ and the Router socket implementation.
 
 Currently a TCP/IP backend is implemented. TCP is a chatty protocol (lots of network
