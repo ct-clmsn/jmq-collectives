@@ -70,7 +70,7 @@ public class TcpBackend implements Backend, Collectives {
     public long n_ranks() { return this.nranks_; }
     public long rank() { return this.rank_; }
 
-    public <Data extends java.io.Serializable> void send(final long rnk, Data data) throws IOException {
+    public <Data extends java.io.Serializable> void send(final long rnk, Data data) throws IOException, ClassNotFoundException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
         ObjectOutputStream out = new ObjectOutputStream(buffer);
         out.writeObject(data);
@@ -95,7 +95,8 @@ public class TcpBackend implements Backend, Collectives {
     }
     
     public <Data extends java.io.Serializable> Data broadcast(Data data) throws IOException, ClassNotFoundException {
-        long depth = (long)Math.ceil(Math.log(this.nranks_) / Math.log(2));
+
+        final long depth = (long)Math.ceil(Math.log(this.nranks_) / Math.log(2));
         long k = this.nranks_ / 2;
         boolean not_recv = true; 
 
@@ -206,36 +207,39 @@ public class TcpBackend implements Backend, Collectives {
         java.util.stream.Stream<Data> out = null;
         Vector<java.util.stream.Stream<Data>> streams = new Vector<java.util.stream.Stream<Data>>();
 
+        java.util.Vector<Data> subdata = new java.util.Vector<Data>();
+        while(data.hasNext()) {
+            subdata.addElement( data.next() ); 
+        }
+
         if(this.rank_ > 0) {
-            //java.util.Spliterator<Data> sitr = java.util.Spliterators.spliteratorUnknownSize(data, 0);
-            //out = java.util.stream.StreamSupport.stream(sitr, false);
-            out = null;
+            java.util.Spliterator<Data> sitr = java.util.Spliterators.spliteratorUnknownSize(subdata.iterator(), 0);
+            out = java.util.stream.StreamSupport.stream(sitr, false);
         }
         else {
-            java.util.Spliterator<Data> sitr = java.util.Spliterators.spliteratorUnknownSize(data, 0);
+            java.util.Spliterator<Data> sitr = java.util.Spliterators.spliteratorUnknownSize(subdata.iterator(), 0);
             java.util.stream.Stream<Data> datastrm = java.util.stream.StreamSupport.stream(sitr, false);
             streams.addElement(datastrm);
         }
 
-        for(long _d = 0; _d < depth; ++_d) {
-            if ((mask & this.rank_) == 0) {
-                final long child = this.rank_ | mask;
-                if( child < this.nranks_ ) {
-                    java.util.Vector<Data> res = this.recv(child);
-                    streams.addElement(res.stream());
-                }
-            }
-            else {
-                java.util.Vector<Data> subdata = new java.util.Vector<Data>();
-                while(data.hasNext()) {
-                   subdata.addElement( data.next() ); 
-                }
- 
-                final long parent = this.rank_ & ((mask>0) ? 0 : 1);
-                this.send(parent, subdata);
-            }
+        {
+            java.util.Vector<Data> res = null;
 
-            mask <<= 1;
+            for(long _d = 0; _d < depth; ++_d) {
+                if ((mask & this.rank_) == 0) {
+                    final long child = this.rank_ | mask;
+                    if( child < this.nranks_ ) {
+                        res = this.recv(child);
+                        streams.addElement(res.stream());
+                    }
+                }
+                else {
+                    final long parent = this.rank_ & ((mask>0) ? 0 : 1);
+                    this.send(parent, subdata);
+                }
+
+                mask <<= 1;
+            }
         }
 
         if( this.rank() < 1 ) {

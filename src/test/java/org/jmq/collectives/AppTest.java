@@ -145,10 +145,10 @@ public class AppTest
         {
             System.out.println("gather");
             Vector<Integer> ivalues = new Vector<Integer>();
-            ivalues.addElement(1);
-            ivalues.addElement(1);
-            ivalues.addElement(1);
-            ivalues.addElement(1);
+            ivalues.addElement((int)be.rank());
+            ivalues.addElement((int)be.rank());
+            ivalues.addElement((int)be.rank());
+            ivalues.addElement((int)be.rank());
 
             java.util.stream.Stream<Integer> ovalues_stream = null;
 
@@ -164,14 +164,14 @@ public class AppTest
 
             // gather consolidates to rank 0
             //
-            if(ovalues_stream != null && be.rank() < 1 ) {
+            //if(ovalues_stream != null && be.rank() < 1 ) {
                 Vector<Integer> ovalues_res = ovalues_stream.collect(java.util.stream.Collectors.toCollection(Vector<Integer>::new));
        
                 System.out.println("ovalues\t" + ovalues_res.size());
                 for(Integer iv : ovalues_res) {
                     System.out.println(iv);
                 }
-            }
+            //}
         }
 
         try {

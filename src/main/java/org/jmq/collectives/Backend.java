@@ -13,6 +13,6 @@ public interface Backend {
     public void finalize();
     public long rank();
     public long n_ranks();
-    public <Data extends java.io.Serializable> void send(final long rank, Data data) throws IOException;
+    public <Data extends java.io.Serializable> void send(final long rank, Data data) throws IOException, ClassNotFoundException;
     public <Data extends java.io.Serializable> Data recv(final long rank) throws IOException, ClassNotFoundException;
 }
