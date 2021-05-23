@@ -222,24 +222,20 @@ public class TcpBackend implements Backend, Collectives {
             streams.addElement(datastrm);
         }
 
-        {
-            java.util.Vector<Data> res = null;
-
-            for(long _d = 0; _d < depth; ++_d) {
-                if ((mask & this.rank_) == 0) {
-                    final long child = this.rank_ | mask;
-                    if( child < this.nranks_ ) {
-                        res = this.recv(child);
-                        streams.addElement(res.stream());
-                    }
+        for(long _d = 0; _d < depth; ++_d) {
+            if ((mask & this.rank_) == 0) {
+                final long child = this.rank_ | mask;
+                if( child < this.nranks_ ) {
+                    java.util.Vector<Data> res = this.recv(child);
+                    streams.addElement(res.stream());
                 }
-                else {
-                    final long parent = this.rank_ & ((mask>0) ? 0 : 1);
-                    this.send(parent, subdata);
-                }
-
-                mask <<= 1;
             }
+            else {
+                final long parent = this.rank_ & ((mask>0) ? 0 : 1);
+                this.send(parent, subdata);
+            }
+
+            mask <<= 1;
         }
 
         if( this.rank() < 1 ) {
