@@ -6,9 +6,6 @@
 import org.jmq.collectives.Params;
 import org.jmq.collectives.TcpBackend;
 
-//import static org.junit.Assert.assertTrue;
-//import org.junit.Test;
-
 import java.lang.ClassNotFoundException;
 import java.io.IOException;
 import java.util.Vector;
@@ -18,11 +15,6 @@ import java.util.Vector;
  */
 public class AppTest 
 {
-    /**
-     * Rigorous Test :-)
-     */
-    //@Test
-    //public void shouldAnswerWithTrue()
     public static void main(String [] args)
     {
   

@@ -7,7 +7,7 @@
 
 This library implements a [SPMD](https://en.m.wikipedia.org/wiki/SPMD) (single program
 multiple data) model and collective communication algorithms (Robert van de Geijn's
-Binomial Tree) in Rust using [JMQ](https://github.com/zeromq/jeromq). The library provides log2(N)
+Binomial Tree) in Java using [JeroMQ](https://github.com/zeromq/jeromq). The library provides log2(N)
 algorithmic performance for each collective operation over N compute hosts.
 
 Collective communication algorithms are used in HPC (high performance computing) / Supercomputing
@@ -33,7 +33,7 @@ supplied to correctly run programs:
 
 * JMQ_COLLECTIVES_NRANKS
 * JMQ_COLLECTIVES_RANK
-* JMQ_COLLECTIVES_ADDRESSES
+* JMQ_COLLECTIVES_IPADDRESSES
 
 JMQ_COLLECTIVES_NRANKS - unsigned integer value indicating
 how many processes (instances or copies of the program)
@@ -44,15 +44,15 @@ the process instance this program represents. This is
 analogous to a user provided thread id. The value must
 be 0 or less than JMQ_COLLECTIVES_NRANKS.
 
-JMQ_COLLECTIVES_ADDRESSES - should contain a ',' delimited
+JMQ_COLLECTIVES_IPADDRESSES - should contain a ',' delimited
 list of ip addresses and ports. The list length should be
 equal to the integer value of JMQ_COLLECTIVES_NRANKS. An
 example for a 2 rank application name `app` is below:
 
 ```
-JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=0 JMQ_COLLECTIVES_ADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
+JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=0 JMQ_COLLECTIVES_IPADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
 
-JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=1 JMQ_COLLECTIVES_ADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
+JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=1 JMQ_COLLECTIVES_IPADDRESSES=127.0.0.1:5555,127.0.0.1:5556 ./app
 ```
 
 In this example, Rank 0 maps to 127.0.0.1:5555 and Rank 1
@@ -65,12 +65,22 @@ environment variables when jobs are submitted.
 
 ### Implementation Notes
 
-This implementation uses java.util.streams.* features. Users will
+Users should make sure to deploy distributed jobs with a power of 2, or log2(N),
+instances of an application developed with this library.
+
+This implementation uses java.util.streams.* and Java's lambda features. Users will
 need a version of the jdk that supports this functionality.
 
-This implementation is a *pure Java* implementation of SPMD collectives.
-The intent is to avoid the overhead of calling out of the JVM through
-JNA or JNI.
+This implementation is a *pure Java* implementation of SPMD collectives. The intent
+is to avoid the overhead of calling out of the JVM through JNA or JNI.
+
+The implementation uses JeroMQ's [Router](https://www.javadoc.io/doc/org.zeromq/jeromq/0.4.0/zmq/Router.html) sockets
+this should provide a measure of connection resiliency. Note scalability limitations for
+this library will be inherited from JeroMQ and the Router socket implementation.
+
+Currently a TCP/IP backend is implemented. TCP is a chatty protocol (lots of network
+traffic is generated) and will have an adverse impact on performance. That said, TCP
+is highly available and reliable.
 
 ### License
 
