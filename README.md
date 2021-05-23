@@ -14,15 +14,15 @@ Collective communication algorithms are used in HPC (high performance computing)
 libraries and runtime systems such as [MPI](https://www.open-mpi.org) and [OpenSHMEM](http://openshmem.org).
 
 Documentation for this library can be found on it's [wiki](https://github.com/ct-clmsn/jmq-collectives/wiki).
-Wikipedia has a nice tutorial on collectives and SPMD programming [here](https://en.wikipedia.org/wiki/Collective_operation).
+Wikipedia has a nice summary about collectives and SPMD programming [here](https://en.wikipedia.org/wiki/Collective_operation).
 
 ### Algorithms Implemented
 
-* Broadcast
-* Reduction
-* Scatter
-* Gather
-* Barrier
+* [Broadcast](https://en.wikipedia.org/wiki/Broadcast_(parallel_pattern))
+* [Reduction](https://en.wikipedia.org/wiki/Broadcast_(parallel_pattern))
+* [Scatter](https://en.wikipedia.org/wiki/Collective_operation#Scatter_[9])
+* [Gather](https://en.wikipedia.org/wiki/Collective_operation#Gather_[8])
+* [Barrier](https://en.wikipedia.org/wiki/Barrier_(computer_science))
 
 ### Configuring Distributed Program Execution
 
