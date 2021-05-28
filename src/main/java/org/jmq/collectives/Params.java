@@ -25,28 +25,28 @@ public class Params extends BasicParams {
             this.liveness = Long.parseLong(env.get("JMQ_COLLECTIVES_LIVENESS"));
         }
         else {
-            this.liveness = 0;
+            this.liveness = 3;
         }
 
         if(env.containsKey("JMQ_COLLECTIVES_INTERVAL")) {
             this.interval = Long.parseLong(env.get("JMQ_COLLECTIVES_INTERVAL"));
         }
         else {
-            this.interval = 0;
+            this.interval = 1000;
         }
 
         if(env.containsKey("JMQ_COLLECTIVES_INTERVAL_MAX")) {
             this.interval_max = Long.parseLong(env.get("JMQ_COLLECTIVES_INTERVAL_MAX"));
         }
         else {
-            this.interval_max = 0;
+            this.interval_max = 1000;
         }
 
         if(env.containsKey("JMQ_COLLECTIVES_INTERVAL_INIT")) {
             this.interval_init = Long.parseLong(env.get("JMQ_COLLECTIVES_INTERVAL_INIT"));
         }
         else {
-            this.interval_init = 0;
+            this.interval_init = 32000;
         }
     }
 
