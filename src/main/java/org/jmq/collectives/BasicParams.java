@@ -15,7 +15,7 @@ public class BasicParams {
     private long rank_;
     private Vector<String> addresses_;
 
-    public Params() {
+    public BasicParams() {
         final Map<String, String> env = System.getenv();
 
         if(env.containsKey("JMQ_COLLECTIVES_NRANKS")) {
