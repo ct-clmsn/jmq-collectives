@@ -82,6 +82,12 @@ public class TcpBackend implements Backend, Collectives {
         this.req.send(databuf, 0);
     }
 
+    public void send(final long rnk, byte[] buff) throws IOException, ClassNotFoundException {
+        assert rnk > this.nranks_;
+        this.req.send(String.valueOf(rnk), ZMQ.SNDMORE);
+        this.req.send(buff, 0);
+    }
+
     public <Data extends java.io.Serializable> Data recv(final long rnk) throws IOException, ClassNotFoundException {
         assert rnk > this.nranks_;
 
