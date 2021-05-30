@@ -27,9 +27,20 @@ Wikipedia has a nice summary about collectives and SPMD programming [here](https
 ### Configuring Distributed Program Execution
 
 This library requires the use of environment variables
-to configure distributed runs of SPMD applications.
-Each of the following environment variables needs to be
-supplied to correctly run programs:
+to configure distributed runs of SPMD applications. The
+library implements Collective operations to a Backend type.
+
+Users are provided 2 Backend types for TCP/IP networks. The
+first Backend type is a BasicTcpBackend. The BasicTcpBackend
+does not perform heartbeats to determine if a remote process
+has failed. The second Backend is TcpBackend. This backend
+spins up an I/O thread and implements a modified version of
+Pieter Hintjens [heartbeat algorithm](https://www.oreilly.com/library/view/zeromq/9781449334437/) this
+implementation should provide some form of remote process
+failure detection.
+
+Users are required to supply each of the following environment
+variables to correctly run programs:
 
 * JMQ_COLLECTIVES_NRANKS
 * JMQ_COLLECTIVES_RANK
