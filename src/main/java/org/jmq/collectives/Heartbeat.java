@@ -29,7 +29,6 @@ public class Heartbeat implements Runnable {
     private long liveness;
     private long interval;
     private long interval_init;
-    private long interval_max;
     private boolean halt;
     private ZMQ.Socket req;
     private ZMQ.Socket rep;
@@ -48,7 +47,6 @@ public class Heartbeat implements Runnable {
         this.liveness = p.getLiveness();
         this.interval = p.getInterval();
         this.interval_init = p.getIntervalInit();
-        this.interval_max = p.getIntervalMax();
 
         this.rep = ctx.createSocket(SocketType.ROUTER);
         this.rep.setIdentity(Integer.toUnsignedString((int)this.rank).getBytes());
@@ -165,94 +163,97 @@ public class Heartbeat implements Runnable {
 
             final int num_events = this.poller.poll(this.interval * 1000);
 
-            // internal (this.data_rep)
-            //
-            if(this.poller.isReadable(this.data_rep)) {
-                String xmtrnkstr = this.data_rep.recvStr(0);
-                byte[] data = this.data_rep.recv(0);
-                if(xmtrnkstr.equals("-1")) { break; }
+            if(num_events > 0) {
+                // internal (this.data_rep)
+                //
+                if(this.poller.isReadable(this.data_rep)) {
+                    String xmtrnkstr = this.data_rep.recvStr(0);
+                    byte[] data = this.data_rep.recv(0);
+                    if(xmtrnkstr.equals("-1")) { break; }
 
-                Message msg = new Message(data, false, Integer.valueOf(xmtrnkstr).longValue());
-                try {
-                    ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
-                    ObjectOutputStream out = new ObjectOutputStream(buffer);
-                    out.writeObject(msg);
-                    out.close();
-                    byte [] databuf = buffer.toByteArray();
-
-                    this.req.send(xmtrnkstr, ZMQ.SNDMORE);
-                    this.req.send(databuf, 0);
-                }
-                catch(Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            // external (this.rep)
-            //
-            if(this.poller.isReadable(this.rep)) {
-                for(int re = 0; re < num_events; ++re) { 
-                    String rnkstr = this.rep.recvStr(0);
-                    byte[] data = this.rep.recv(0);
-                    final int rcvrank = (int)Integer.valueOf(rnkstr).longValue();
-
+                    Message msg = new Message(data, false, Integer.valueOf(xmtrnkstr).longValue());
                     try {
-                        ByteArrayInputStream buffer = new ByteArrayInputStream(data);
-                        ObjectInputStream ois = new ObjectInputStream(buffer);
-                        Message msg = (Message)ois.readObject();
-                        ois.close();
-                        buffer.close();
+                        ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
+                        ObjectOutputStream out = new ObjectOutputStream(buffer);
+                        out.writeObject(msg);
+                        out.close();
+                        byte [] databuf = buffer.toByteArray();
 
-                        if(msg.isHeartbeat()) {
-                            liveness[rcvrank] = heartbeat_liveness;
-                            interval[rcvrank] = interval_init;
-                        }
-                        else {
-                            byte[] databuf = msg.bytes();
-                            this.data_req.send(String.valueOf(msg.getRank()), ZMQ.SNDMORE);
-                            this.data_req.send(databuf, 0);
-                            liveness[rcvrank] = heartbeat_liveness;
-                            interval[rcvrank] = interval_init;
-                        }
+                        this.req.send(xmtrnkstr, ZMQ.SNDMORE);
+                        this.req.send(databuf, 0);
                     }
                     catch(Exception e) {
                         e.printStackTrace();
                     }
                 }
-            }
-            else if(--liveness[rank_ptr] == 0) {
-                if(interval[rank_ptr] < interval_max) {
-                       interval[rank_ptr] *= 2;
-                }
 
-                // throw exception!
+                // external (this.rep)
                 //
-               
-                throw new HeartbeatException((long)rank_ptr);
-                //liveness[rank_ptr] = heartbeat_liveness;
-            }
+                if(this.poller.isReadable(this.rep)) {
+                    for(int re = 0; re < num_events; ++re) { 
+                        String rnkstr = this.rep.recvStr(0);
+                        byte[] data = this.rep.recv(0);
+                        final int rcvrank = (int)Integer.valueOf(rnkstr).longValue();
 
-           
-            is_halt = this.getHalt();
+                        try {
+                            ByteArrayInputStream buffer = new ByteArrayInputStream(data);
+                            ObjectInputStream ois = new ObjectInputStream(buffer);
+                            Message msg = (Message)ois.readObject();
+                            ois.close();
+                            buffer.close();
 
-            // xmt heartbeat
-            //
-            if( (is_halt == false) && (num_events < 1) && (System.currentTimeMillis() > heartbeat_at[rank_ptr])) {
-                heartbeat_at[(int)rank_ptr] = System.currentTimeMillis() + interval[(int)rank_ptr];
-                Message msg = new Message(hb_buff, true, this.rank);
-
-                try {
-                    ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
-                    ObjectOutputStream out = new ObjectOutputStream(buffer);
-                    out.writeObject(msg);
-                    out.close();
-                    byte [] databuf = buffer.toByteArray();
-
-                    this.req.send(String.valueOf(rank_ptr), ZMQ.SNDMORE);
-                    this.req.send(databuf, 0);
+                            if(msg.isHeartbeat()) {
+                                liveness[rcvrank] = heartbeat_liveness;
+                                interval[rcvrank] = interval_init;
+                            }
+                            else {
+                                byte[] databuf = msg.bytes();
+                                this.data_req.send(String.valueOf(msg.getRank()), ZMQ.SNDMORE);
+                                this.data_req.send(databuf, 0);
+                                liveness[rcvrank] = heartbeat_liveness;
+                                interval[rcvrank] = interval_init;
+                            }
+                        }
+                        catch(Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-                catch(Exception e) {
-                    e.printStackTrace();
+                else if(--liveness[rank_ptr] == 0) {
+                    // throw exception!
+                    //
+               
+                    throw new HeartbeatException((long)rank_ptr);
+                }
+            }
+            else {
+           
+                // xmt heartbeat
+                //
+                if( System.currentTimeMillis() > heartbeat_at[rank_ptr] ) {
+                    heartbeat_at[(int)rank_ptr] = System.currentTimeMillis() + interval[(int)rank_ptr];
+                    Message msg = new Message(hb_buff, true, this.rank);
+
+                    try {
+                        ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
+                        ObjectOutputStream out = new ObjectOutputStream(buffer);
+                        out.writeObject(msg);
+                        out.close();
+                        byte [] databuf = buffer.toByteArray();
+
+                        this.req.send(String.valueOf(rank_ptr), ZMQ.SNDMORE);
+                        this.req.send(databuf, 0);
+                    }
+                    catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if(--liveness[rank_ptr] == 0) {
+                    // throw exception!
+                    //
+               
+                    throw new HeartbeatException((long)rank_ptr);
                 }
             }
 

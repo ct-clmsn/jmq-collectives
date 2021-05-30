@@ -33,11 +33,11 @@ library implements Collective operations to a Backend type.
 Users are provided 2 Backend types for TCP/IP networks. The
 first Backend type is a BasicTcpBackend. The BasicTcpBackend
 does not perform heartbeats to determine if a remote process
-has failed. The second Backend is TcpBackend. This backend
+has failed. The second Backend type is TcpBackend. The TcpBackend
 spins up an I/O thread and implements a modified version of
-Pieter Hintjens [heartbeat algorithm](https://www.oreilly.com/library/view/zeromq/9781449334437/) this
-implementation should provide some form of remote process
-failure detection.
+Pieter Hintjens ['Paranoid Pirate' heartbeat algorithm](https://www.oreilly.com/library/view/zeromq/9781449334437/). The
+heartbeat implementation should provide some form of remote
+process fault detection.
 
 Users are required to supply each of the following environment
 variables to correctly run programs:
@@ -69,6 +69,26 @@ JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=1 JMQ_COLLECTIVES_IPADDRESSES=127.
 In this example, Rank 0 maps to 127.0.0.1:5555 and Rank 1
 maps to 127.0.0.1:5556.
 
+TcpBackend users may modify the behavior of the hearbeat
+implementation by changing the following environment
+variables:
+
+* JMQ_COLLECTIVES_LIVENESS
+* JMQ_COLLECTIVES_INTERVAL
+* JMQ_COLLECTIVES_INTERVAL_INIT
+
+JMQ_COLLECTIVES_LIVENESS - unsigned integer value defining
+how many times a heartbeat can be missed before failure is
+determined.
+
+JMQ_COLLECTIVES_INTERVAL - unsigned integer value defining
+how many milliseconds to wait before communicating a
+heartbeat.
+
+JMQ_COLLECTIVES_INTERVAL_INIT - unsigned integer value defining
+the inital number of milliseconds to wait before communicating a
+heartbeat.
+
 HPC batch scheduling systems like [Slurm](https://en.m.wikipedia.org/wiki/Slurm_Workload_Manager),
 [TORQUE](https://en.m.wikipedia.org/wiki/TORQUE), [PBS](https://en.wikipedia.org/wiki/Portable_Batch_System),
 etc. provide mechanisms to automatically define these
@@ -76,22 +96,24 @@ environment variables when jobs are submitted.
 
 ### Implementation Notes
 
-Users should make sure to deploy distributed jobs with a power of 2, or log2(N),
-instances of an application developed with this library.
+Users should make sure to deploy distributed jobs with a power of 2,
+or log2(N), instances of an application developed with this library.
 
-This implementation uses java.util.streams.* and Java's lambda features. Users will
-need a version of the jdk that supports this functionality.
+This implementation uses java.util.streams.* and Java's lambda features.
+Users will need a version of the jdk that supports this functionality.
 
-This implementation is a *pure Java* implementation of SPMD collectives. The intent
-is to avoid the overhead of calling out of the JVM through JNA or JNI.
+This implementation is a *pure Java* implementation of SPMD collectives.
+The intent is to avoid the overhead of calling out of the JVM through JNA
+or JNI.
 
 The implementation uses JeroMQ's [Router](https://www.javadoc.io/doc/org.zeromq/jeromq/0.4.0/zmq/Router.html)
-sockets. Router sockets should provide a measure of connection resiliency. Note scalability limitations for
-this library will be inherited from JeroMQ and the Router socket implementation.
+sockets. Router sockets should provide a measure of connection resiliency. Note scalability
+limitations for this library will be inherited from JeroMQ and the Router socket
+implementation.
 
-Currently a TCP/IP backend is implemented. TCP is a chatty protocol (lots of network
-traffic is generated) and will have an adverse impact on performance. That said, TCP
-is highly available and reliable.
+Currently a TCP/IP backend is implemented. TCP is a chatty protocol (lots of
+network traffic is generated) and will have an adverse impact on performance.
+That said, TCP is highly available and reliable.
 
 ### License
 

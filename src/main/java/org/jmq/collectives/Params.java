@@ -35,13 +35,6 @@ public class Params extends BasicParams {
             this.interval = 1000;
         }
 
-        if(env.containsKey("JMQ_COLLECTIVES_INTERVAL_MAX")) {
-            this.interval_max = Long.parseLong(env.get("JMQ_COLLECTIVES_INTERVAL_MAX"));
-        }
-        else {
-            this.interval_max = 1000;
-        }
-
         if(env.containsKey("JMQ_COLLECTIVES_INTERVAL_INIT")) {
             this.interval_init = Long.parseLong(env.get("JMQ_COLLECTIVES_INTERVAL_INIT"));
         }
@@ -53,8 +46,6 @@ public class Params extends BasicParams {
     public long getLiveness() { return this.liveness; }
 
     public long getInterval() { return this.interval; }
-
-    public long getIntervalMax() { return this.interval_max; }
 
     public long getIntervalInit() { return this.interval_init; }
 }
