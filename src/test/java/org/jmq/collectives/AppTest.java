@@ -33,6 +33,9 @@ public class AppTest
             int val = 0;
 
             if(be.rank() == 0) {
+                try {
+                    Thread.sleep(10000);
+                } catch(Exception e) { e.printStackTrace(); }
                 val = 1;
             }
 
@@ -49,6 +52,7 @@ public class AppTest
 
         }
 
+        System.out.println("barrier");
         try {
             be.barrier();
         }
@@ -69,6 +73,10 @@ public class AppTest
             values.addElement(1);
             values.addElement(1);
             values.addElement(1);
+
+                try {
+                    Thread.sleep(32000);
+                } catch(Exception e) { e.printStackTrace(); }
 
             try {
                 Integer val = be.reduce(0, (x1, x2) -> x1 + x2, values.stream());
@@ -166,6 +174,7 @@ public class AppTest
             //}
         }
 
+        System.out.println("barrier");
         try {
             be.barrier();
         }
@@ -175,7 +184,7 @@ public class AppTest
         catch(ClassNotFoundException e) {
             e.printStackTrace();
         }
-
+System.out.println("finalize");
         be.finalize();
     }
 }

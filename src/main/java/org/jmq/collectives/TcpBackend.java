@@ -17,65 +17,67 @@ import java.io.IOException;
 import org.zeromq.SocketType;
 import org.zeromq.ZMQ;
 import org.zeromq.ZContext;
-import org.zeromq.ZMsg;
 
 public class TcpBackend implements Backend, Collectives {
     private long nranks_;
     private long rank_;
+    private int uuid;
     private ZContext ctx;
     private ZMQ.Socket rep;
     private ZMQ.Socket req;
+    private Heartbeat hb;
+    private Thread hb_thread;
 
     public TcpBackend(final Params p) {
         this.nranks_ = p.n_ranks();
         this.rank_ = p.rank();
         this.ctx = new ZContext();
-        this.rep = this.ctx.createSocket(SocketType.ROUTER);
-        this.req = this.ctx.createSocket(SocketType.ROUTER);
+        this.rep = this.ctx.createSocket(SocketType.PAIR);
+        this.req = this.ctx.createSocket(SocketType.PAIR);
+        this.uuid = java.util.UUID.randomUUID().toString().hashCode();
+        this.hb = null;
+        this.hb_thread = null;
     }
 
     public void initialize(final Params p) {
-        final Vector<String> addresses = p.addresses();
-        assert addresses.size() > this.rank_;
-        final String bind_address_str = addresses.get((int)this.rank_);
-        this.rep.setIdentity(Integer.toUnsignedString((int)this.rank_).getBytes());
-        this.rep.setProbeRouter(true);
-        this.rep.bind("tcp://" + bind_address_str);
-
-        this.req.setIdentity(Integer.toUnsignedString((int)this.rank_).getBytes());
-        this.req.setProbeRouter(true);
-       
-        for(long orank = 0; orank < (long)addresses.size(); ++orank) {
-            if(orank == this.rank_) {
-                    for(long irank = 0; irank < (long)addresses.size(); ++irank) {
-                        if(irank != this.rank_) {
-                            this.req.connect( "tcp://" + addresses.get((int)irank) );
-
-                            // clears the server's ZMQ_ROUTER_ID data from ZMQ_PROBE
-                            //
-                            this.req.recv(); 
-                            this.req.recv();
-                        }
-                    }
-            }
-            else {
-                this.rep.recv();
-                this.rep.recv();
-            }
-        }
+        this.rep.bind("inproc://" + this.uuid + "tcpbackend");
+        final String rep_uuid = String.valueOf(this.uuid);
+        this.hb = new Heartbeat(this.ctx, rep_uuid, p);
+        this.hb.initialize(p);
+        this.req.connect("inproc://" + this.uuid + "hb");
+        this.hb_thread = new Thread(this.hb);
+        this.hb_thread.start();
     }
 
-    public void finalize() {}
+    public void finalize() {
+        byte [] empty = new byte[1];
+        empty[0] = 0;
+        this.req.send(String.valueOf(-1), ZMQ.SNDMORE);
+        this.req.send(empty, 0);
+        this.hb.setHalt(true);
+
+        try {
+            this.hb_thread.join();
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+        this.req.close();
+        this.rep.close();
+        this.ctx.close();
+    }
 
     public long n_ranks() { return this.nranks_; }
     public long rank() { return this.rank_; }
 
     public <Data extends java.io.Serializable> void send(final long rnk, Data data) throws IOException, ClassNotFoundException {
+        assert rnk > this.nranks_;
         ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
         ObjectOutputStream out = new ObjectOutputStream(buffer);
         out.writeObject(data);
         out.close();
         byte [] databuf = buffer.toByteArray();
+
         this.req.send(String.valueOf(rnk), ZMQ.SNDMORE);
         this.req.send(databuf, 0);
     }
@@ -85,6 +87,7 @@ public class TcpBackend implements Backend, Collectives {
 
         String rnkstr = this.rep.recvStr(0);
         byte[] data = this.rep.recv(0);
+
         ByteArrayInputStream buffer = new ByteArrayInputStream(data);
         ObjectInputStream ois = new ObjectInputStream(buffer);
         Data ret = (Data)ois.readObject();
@@ -118,11 +121,13 @@ public class TcpBackend implements Backend, Collectives {
 
     public <Data extends java.io.Serializable> Data reduce(final Data init, java.util.function.BinaryOperator<Data> fn, java.util.stream.Stream<Data> data) throws IOException, ClassNotFoundException {
 
+        Data local = null;
+
         final long depth = (long)Math.ceil(Math.log(this.nranks_) / Math.log(2));
         boolean not_sent = true; 
         long mask = 0x1;
 
-        Data local = data.reduce(init, fn);
+        local = data.reduce(init, fn);
 
         for(long _d = 0; _d < depth; ++_d) {
             if( (mask & this.rank_) == 0 ) {
@@ -144,24 +149,23 @@ public class TcpBackend implements Backend, Collectives {
     }
 
     public void barrier() throws IOException, ClassNotFoundException {
-        int v = (this.rank_ == 0) ? 1 : 0;
-        this.broadcast(v);
-
         Vector<Integer> va = new Vector<Integer>();
-        va.addElement(1);
         va.addElement(1);
         java.util.function.BinaryOperator<Integer> ibo = (x1, x2) -> x1 + x2;
         this.reduce(Integer.valueOf(0), ibo, va.stream());
+
+        int v = (this.rank_ == 0) ? 1 : 0;
+        this.broadcast(v);
     }
 
     public <Data extends java.io.Serializable> java.util.stream.Stream<Data> scatter(java.util.Iterator<Data> data, final long data_size) throws IOException, ClassNotFoundException {
 
+        java.util.stream.Stream<Data> out = null;
         final long depth = (long)Math.ceil(Math.log(this.nranks_) / Math.log(2));
         final long block_size = data_size / this.nranks_;
         long k = this.nranks_ / 2;
         boolean not_received = true; 
 
-        java.util.stream.Stream<Data> out = null;
 
         if( this.rank_ < 1 ) {
             final long beg = ((this.rank_ + k) % this.nranks_) * block_size;
@@ -180,7 +184,7 @@ public class TcpBackend implements Backend, Collectives {
 
                 java.util.Vector<Data> subdata = new java.util.Vector<Data>();
                 for(long sp = beg; sp < end; ++sp) {
-                   subdata.addElement( data.next() ); 
+                    subdata.addElement( data.next() ); 
                 }
                 
                 this.send(this.rank_+k, subdata);
@@ -201,10 +205,11 @@ public class TcpBackend implements Backend, Collectives {
 
     public <Data extends java.io.Serializable> java.util.stream.Stream<Data> gather(java.util.Iterator<Data> data, final long data_size) throws IOException, ClassNotFoundException {
 
+        java.util.stream.Stream<Data> out = null;
+
         final long depth = (long)Math.ceil(Math.log(this.nranks_) / Math.log(2));
         long mask = 0x1;
 
-        java.util.stream.Stream<Data> out = null;
         Vector<java.util.stream.Stream<Data>> streams = new Vector<java.util.stream.Stream<Data>>();
 
         java.util.Vector<Data> subdata = new java.util.Vector<Data>();
