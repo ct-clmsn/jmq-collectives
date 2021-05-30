@@ -232,9 +232,12 @@ public class Heartbeat implements Runnable {
                 //liveness[rank_ptr] = heartbeat_liveness;
             }
 
+           
+            is_halt = this.getHalt();
+
             // xmt heartbeat
             //
-            if(num_events < 1 && System.currentTimeMillis() > heartbeat_at[rank_ptr]) {
+            if( (is_halt == false) && (num_events < 1) && (System.currentTimeMillis() > heartbeat_at[rank_ptr])) {
                 heartbeat_at[(int)rank_ptr] = System.currentTimeMillis() + interval[(int)rank_ptr];
                 Message msg = new Message(hb_buff, true, this.rank);
 
