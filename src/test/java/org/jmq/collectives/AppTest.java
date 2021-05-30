@@ -49,6 +49,7 @@ public class AppTest
 
         }
 
+        System.out.println("barrier");
         try {
             be.barrier();
         }
@@ -166,6 +167,7 @@ public class AppTest
             //}
         }
 
+        System.out.println("barrier");
         try {
             be.barrier();
         }
@@ -175,7 +177,7 @@ public class AppTest
         catch(ClassNotFoundException e) {
             e.printStackTrace();
         }
-
+System.out.println("finalize");
         be.finalize();
     }
 }
