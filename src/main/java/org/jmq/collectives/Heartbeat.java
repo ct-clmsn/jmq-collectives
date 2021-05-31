@@ -156,11 +156,7 @@ public class Heartbeat implements Runnable {
 
         boolean is_halt = this.getHalt();
 
-        while(true) {
-            if(is_halt) {
-                break;
-            }
-
+        while(!is_halt) {
             final int num_events = this.poller.poll(this.interval * 1000);
 
             if(num_events > 0) {
