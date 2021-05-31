@@ -33,10 +33,10 @@ Users are provided 2 Backend types for Collective operations
 over TCP. The first Backend type is a BasicTcpBackend. The
 BasicTcpBackend does not perform heartbeats to determine if
 a remote process has failed. The second Backend type is
-TcpBackend. The TcpBackend spins up an I/O thread and
-implements a modified version of Pieter Hintjens ['Paranoid Pirate' heartbeat algorithm](https://www.oreilly.com/library/view/zeromq/9781449334437/). The heartbeat
-implementation should provide some form of remote process
-fault detection.
+TcpBackend. The TcpBackend spins up an I/O thread to manage
+data exchanges from the application and a modified implementation
+of Pieter Hintjens ['Paranoid Pirate' heartbeat algorithm](https://www.oreilly.com/library/view/zeromq/9781449334437/). The heartbeat implementation should provide some form of remote
+process fault detection.
 
 Users are required to supply each of the following environment
 variables to correctly run programs:
