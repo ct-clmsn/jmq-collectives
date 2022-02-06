@@ -5,9 +5,11 @@
 //
 package org.jmq.collectives;
 
+import java.lang.Thread;
 import java.lang.String;
 import java.lang.Math;
 import java.util.Vector;
+import java.util.Random;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ObjectOutputStream;
@@ -22,74 +24,82 @@ import org.zeromq.ZMsg;
 public class BasicTcpBackend implements Backend, Collectives {
     private long nranks_;
     private long rank_;
-    private ZContext ctx;
-    private ZMQ.Socket rep;
-    private ZMQ.Socket req;
+    private Vector<String> addresses;
 
     public BasicTcpBackend(final BasicParams p) {
+        assert p.addresses().size() != p.n_ranks();
         this.nranks_ = p.n_ranks();
         this.rank_ = p.rank();
-        this.ctx = new ZContext();
-        this.rep = this.ctx.createSocket(SocketType.ROUTER);
-        this.req = this.ctx.createSocket(SocketType.ROUTER);
+        this.addresses = p.addresses();
     }
 
-    public void initialize(final Params p) {
-        final Vector<String> addresses = p.addresses();
-        assert addresses.size() > this.rank_;
-        final String bind_address_str = addresses.get((int)this.rank_);
-        this.rep.setIdentity(Integer.toUnsignedString((int)this.rank_).getBytes());
-        this.rep.setProbeRouter(true);
-        this.rep.bind("tcp://" + bind_address_str);
-
-        this.req.setIdentity(Integer.toUnsignedString((int)this.rank_).getBytes());
-        this.req.setProbeRouter(true);
-       
-        for(long orank = 0; orank < (long)addresses.size(); ++orank) {
-            if(orank == this.rank_) {
-                    for(long irank = 0; irank < (long)addresses.size(); ++irank) {
-                        if(irank != this.rank_) {
-                            this.req.connect( "tcp://" + addresses.get((int)irank) );
-
-                            // clears the server's ZMQ_ROUTER_ID data from ZMQ_PROBE
-                            //
-                            this.req.recv(); 
-                            this.req.recv();
-                        }
-                    }
-            }
-            else {
-                this.rep.recv();
-                this.rep.recv();
-            }
-        }
-    }
-
+    public void initialize(final Params p) {}
     public void finalize() {}
 
     public long n_ranks() { return this.nranks_; }
     public long rank() { return this.rank_; }
 
     public <Data extends java.io.Serializable> void send(final long rnk, Data data) throws IOException, ClassNotFoundException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
-        ObjectOutputStream out = new ObjectOutputStream(buffer);
-        out.writeObject(data);
-        out.close();
-        byte [] databuf = buffer.toByteArray();
-        this.req.send(String.valueOf(rnk), ZMQ.SNDMORE);
-        this.req.send(databuf, 0);
+        assert rnk > this.nranks_;
+
+        try( ZContext ctx = new ZContext() ) {
+
+            ZMQ.Socket sock = ctx.createSocket(SocketType.PAIR);
+            sock.setLinger(-1); // message queue must flush before socket is closed and context is closed/destroyedd
+
+            final String addr = "tcp://" + this.addresses.get((int)rnk);
+
+            {
+                boolean connected = false;
+                while(!connected) {
+                    connected = sock.connect(addr);
+                }
+            }
+
+            {
+                boolean not_sent = false;
+        
+                while(!not_sent) {
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
+                    ObjectOutputStream out = new ObjectOutputStream(buffer);
+                    out.writeObject(data);
+                    out.close();
+                    byte [] databuf = buffer.toByteArray();
+                    not_sent = sock.send(databuf, 0);
+                }
+            }
+
+            sock.close();
+        }
     }
 
     public <Data extends java.io.Serializable> Data recv(final long rnk) throws IOException, ClassNotFoundException {
         assert rnk > this.nranks_;
 
-        String rnkstr = this.rep.recvStr(0);
-        byte[] data = this.rep.recv(0);
-        ByteArrayInputStream buffer = new ByteArrayInputStream(data);
-        ObjectInputStream ois = new ObjectInputStream(buffer);
-        Data ret = (Data)ois.readObject();
-        ois.close();
-        buffer.close();
+        Data ret = null;
+
+        try( ZContext ctx = new ZContext() ) {
+        
+            final String addr = "tcp://" + this.addresses.get((int)this.rank_);
+            ZMQ.Socket sock = ctx.createSocket(SocketType.PAIR);
+            sock.setImmediate(true); // immediately accept messages
+
+            {
+                boolean bound = false;
+                while(!bound) {
+                    bound = sock.bind(addr);
+                }
+            }
+
+            byte[] data = sock.recv(0);
+            ByteArrayInputStream buffer = new ByteArrayInputStream(data);
+            ObjectInputStream ois = new ObjectInputStream(buffer);
+            ret = (Data)ois.readObject();
+            ois.close();
+            buffer.close();
+            sock.close();
+
+        }
 
         return ret; 
     }

@@ -4,7 +4,7 @@
 //  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 import org.jmq.collectives.Params;
-import org.jmq.collectives.TcpBackend;
+import org.jmq.collectives.BasicTcpBackend;
 
 import java.lang.ClassNotFoundException;
 import java.io.IOException;
@@ -22,7 +22,7 @@ public class AppTest
         System.out.println(p.rank());
         System.out.println(p.n_ranks());
 
-        TcpBackend be = new TcpBackend(p);
+        BasicTcpBackend be = new BasicTcpBackend(p);
         be.initialize(p);
 
         {
@@ -37,9 +37,9 @@ public class AppTest
                 // have rank 0 sleep
                 // to test heartbeat
                 //
-                try {
-                    Thread.sleep(10000);
-                } catch(Exception e) { e.printStackTrace(); }
+                //try {
+                //    Thread.sleep(10000);
+                //} catch(Exception e) { e.printStackTrace(); }
 
                 val = 1;
             }
