@@ -9,7 +9,7 @@ import java.lang.String;
 import java.util.Vector;
 import java.util.Map;
 
-public class Params extends BasicParams {
+public class BasicParams extends Params {
 
     private long liveness;
     private long interval;
