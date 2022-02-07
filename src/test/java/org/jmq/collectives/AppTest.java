@@ -18,7 +18,7 @@ public class AppTest
     public static void main(String [] args)
     {
   
-        Params p = new Params();
+        BasicParams p = new BasicParams();
         System.out.println(p.rank());
         System.out.println(p.n_ranks());
 

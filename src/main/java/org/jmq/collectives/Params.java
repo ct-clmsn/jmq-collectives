@@ -9,43 +9,40 @@ import java.lang.String;
 import java.util.Vector;
 import java.util.Map;
 
-public class Params extends BasicParams {
+public class Params {
 
-    private long liveness;
-    private long interval;
-    private long interval_init;
-    private long interval_max;
+    private long nranks_;
+    private long rank_;
+    private Vector<String> addresses_;
 
     public Params() {
-        super();
-
         final Map<String, String> env = System.getenv();
 
-        if(env.containsKey("JMQ_COLLECTIVES_LIVENESS")) {
-            this.liveness = Long.parseLong(env.get("JMQ_COLLECTIVES_LIVENESS"));
+        if(env.containsKey("JMQ_COLLECTIVES_NRANKS")) {
+            this.nranks_ = Long.parseLong(env.get("JMQ_COLLECTIVES_NRANKS"));
         }
         else {
-            this.liveness = 3;
+            this.nranks_ = 0;
         }
 
-        if(env.containsKey("JMQ_COLLECTIVES_INTERVAL")) {
-            this.interval = Long.parseLong(env.get("JMQ_COLLECTIVES_INTERVAL"));
+        if(env.containsKey("JMQ_COLLECTIVES_RANK")) {
+            this.rank_ = Long.parseLong(env.get("JMQ_COLLECTIVES_RANK"));
         }
         else {
-            this.interval = 1000;
+            this.rank_ = 0;
         }
 
-        if(env.containsKey("JMQ_COLLECTIVES_INTERVAL_INIT")) {
-            this.interval_init = Long.parseLong(env.get("JMQ_COLLECTIVES_INTERVAL_INIT"));
-        }
-        else {
-            this.interval_init = 32000;
+        this.addresses_ = new Vector<String>();
+        if(env.containsKey("JMQ_COLLECTIVES_IPADDRESSES")) {
+            for(String addr : env.get("JMQ_COLLECTIVES_IPADDRESSES").split(",")) {
+                this.addresses_.addElement(addr);
+            }
         }
     }
 
-    public long getLiveness() { return this.liveness; }
+    public long n_ranks() { return this.nranks_; }
 
-    public long getInterval() { return this.interval; }
-
-    public long getIntervalInit() { return this.interval_init; }
+    public long rank() { return this.rank_; }
+    
+    public Vector<String> addresses() { return this.addresses_; }
 }
