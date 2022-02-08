@@ -113,7 +113,12 @@ It should be noted that Spark and Hadoop offer an SPMD programming
 experience. The difference between this library and Spark and Hadoop
 is that this library provides direct machine-to-machine communication
 through message passing. The Spark and Hadoop model performs a significant
-amount of communication through the file system.
+amount of communication through the file system. Spark and Hadoop also
+provide datatypes (files and RDDs) that play the role of guide rails
+to help users write SPMD programs in the Spark and Hadoop style. This
+library provides no guide rails other than a set of collective communication
+primitives users can leverage to communicate distributed data around
+a cluser running their SPMD application in parallel.
 
 #### How many processs/nodes should I deploy?
 
