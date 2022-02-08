@@ -26,7 +26,7 @@ public class BasicTcpBackend implements Backend, Collectives {
     private long rank_;
     private Vector<String> addresses;
 
-    public BasicTcpBackend(final BasicParams p) {
+    public BasicTcpBackend(final Params p) {
         assert p.addresses().size() != p.n_ranks();
         this.nranks_ = p.n_ranks();
         this.rank_ = p.rank();
