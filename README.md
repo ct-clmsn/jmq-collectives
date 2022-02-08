@@ -170,6 +170,11 @@ opportunities for program failure).
 * This implementation uses java.util.streams.* and Java's lambda features.
 Users will need a version of the jdk that supports this functionality.
 
+* The collectives should not be called from within threads. This is a design
+limitation of this library and a design limitation of JeroMQ. Collectives can
+and should be called from main. (Do not fork a bunch of threads and
+call collective operations!)
+
 * This implementation is a *pure Java* implementation of SPMD collectives.
 The intent is to avoid the overhead of calling out of the JVM through JNA
 or JNI.
