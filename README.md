@@ -51,9 +51,11 @@ equal to the integer value of JMQ_COLLECTIVES_NRANKS. An
 example for a 2 rank application name `app` is below:
 
 ```
-CLASSPATH=.:$CLASSPATH:$HOME/git/jmq-collectives/target/classes/ JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=0 JMQ_COLLECTIVES_IPADDRESSES=127.0.0.1:5555,127.0.0.1:5556 java -cp .:./jeromq-0.5.3-SNAPSHOT.jar:./jmq-collectives-1.0-SNAPSHOT.jar AppTest
+# $DEVPATH is the path to jmq-collectives cloned repository
 
-CLASSPATH=.:$CLASSPATH:$HOME/git/jmq-collectives/target/classes/ JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=1 JMQ_COLLECTIVES_IPADDRESSES=127.0.0.1:5555,127.0.0.1:5556 java -cp .:./jeromq-0.5.3-SNAPSHOT.jar:./jmq-collectives-1.0-SNAPSHOT.jar AppTest
+CLASSPATH=.:$CLASSPATH:$DEVPATH/jmq-collectives/target/classes/ JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=0 JMQ_COLLECTIVES_IPADDRESSES=127.0.0.1:5555,127.0.0.1:5556 java -cp .:./jeromq-0.5.3-SNAPSHOT.jar:./jmq-collectives-1.0-SNAPSHOT.jar AppTest
+
+CLASSPATH=.:$CLASSPATH:$DEVPATH/jmq-collectives/target/classes/ JMQ_COLLECTIVES_NRANKS=2 JMQ_COLLECTIVES_RANK=1 JMQ_COLLECTIVES_IPADDRESSES=127.0.0.1:5555,127.0.0.1:5556 java -cp .:./jeromq-0.5.3-SNAPSHOT.jar:./jmq-collectives-1.0-SNAPSHOT.jar AppTest
 ```
 
 In this example, Rank 0 maps to 127.0.0.1:5555 and Rank 1
