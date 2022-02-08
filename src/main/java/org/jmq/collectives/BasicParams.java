@@ -16,7 +16,7 @@ public class BasicParams extends Params {
     private long interval_init;
     private long interval_max;
 
-    public Params() {
+    public BasicParams() {
         super();
 
         final Map<String, String> env = System.getenv();
