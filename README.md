@@ -61,26 +61,6 @@ CLASSPATH=.:$CLASSPATH:$DEVPATH/jmq-collectives/target/classes/ JMQ_COLLECTIVES_
 In this example, Rank 0 maps to 127.0.0.1:5555 and Rank 1
 maps to 127.0.0.1:5556.
 
-TcpBackend users may modify the behavior of the hearbeat
-implementation by changing the following environment
-variables:
-
-* JMQ_COLLECTIVES_LIVENESS
-* JMQ_COLLECTIVES_INTERVAL
-* JMQ_COLLECTIVES_INTERVAL_INIT
-
-JMQ_COLLECTIVES_LIVENESS - unsigned integer value defining
-how many times a heartbeat can be missed before failure is
-determined.
-
-JMQ_COLLECTIVES_INTERVAL - unsigned integer value defining
-how many milliseconds to wait before communicating a
-heartbeat.
-
-JMQ_COLLECTIVES_INTERVAL_INIT - unsigned integer value defining
-the inital number of milliseconds to wait before communicating a
-heartbeat.
-
 HPC batch scheduling systems like [Slurm](https://en.m.wikipedia.org/wiki/Slurm_Workload_Manager),
 [TORQUE](https://en.m.wikipedia.org/wiki/TORQUE), [PBS](https://en.wikipedia.org/wiki/Portable_Batch_System),
 etc. provide mechanisms to automatically define these
