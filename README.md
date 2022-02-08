@@ -69,7 +69,7 @@ environment variables when jobs are submitted.
 ### Implementation Notes
 
 
-## Who is this library for?
+#### Who is this library for?
 
 Several environments the author has worked in lack MPI (OpenMPI,
 MPICH, etc) installations and/or installing an MPI implementation
@@ -81,7 +81,7 @@ needs SPMD programming, and all the options you want or need
 (OpenMPI, MPICH, etc) are not available then this library is for
 you.
 
-## What can I do with this library?
+#### What can I do with this library?
 
 Do you work in the large scale data analysis or machine learning
 problem space? Do you work on scientific computing problems? Do
@@ -93,7 +93,7 @@ be able to implement SPMD parallel programs, for a cluster, without
 having to contort your algorithm into the Hadoop Map/Reduce programming
 model.
 
-## What is SPMD?
+#### What is SPMD?
 
 SPMD (single-program many data) is a parallel programming style that
 requires users to conceptualize a network of computers as a large
@@ -115,19 +115,19 @@ is that this library provides direct machine-to-machine communication
 through message passing. The Spark and Hadoop model performs a significant
 amount of communication through the file system.
 
-## How many processs/nodes should I deploy?
+#### How many processs/nodes should I deploy?
 
 Users should make sure to deploy distributed jobs with a power of 2,
 or log2(N), instances of an application developed with this library.
 
-## Why use 0MQ tcp protocol?
+#### Why use 0MQ tcp protocol?
 
 Currently a TCP/IP backend is implemented. TCP is a chatty protocol
 (lots of network traffic is generated) and will have an adverse impact
 on performance. That said, TCP is highly available and reliable and
 JeroMQ provides support for this network protocol.
 
-## How scalable is it?
+#### How scalable is it?
 
 In the interest of providing a scalable solution, each time a communication
 operation is invoked, a couple of things happen on the sender and receiver
@@ -165,7 +165,7 @@ performance trade-off!), and it creates an incentive to minimize the number of
 communication events (communication means waiting longer for a solution and more
 opportunities for program failure).
 
-## Limitations? Future Support/Features?
+#### Limitations? Future Support/Features?
 
 * This implementation uses java.util.streams.* and Java's lambda features.
 Users will need a version of the jdk that supports this functionality.
